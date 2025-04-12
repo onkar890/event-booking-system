@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Booking System</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- FullCalendar CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="styles.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="text-center my-5">
+            <h1>Event Booking System</h1>
+        </header>
+
+        <div class="row">
+            <!-- Calendar Section -->
+            <div class="col-lg-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Select Event Date</h2>
+                    </div>
+                    <div class="card-body">
+                        <div id="calendar"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Booking Form Section -->
+            <div class="col-lg-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Book Your Event</h2>
+                    </div>
+                    <div class="card-body">
+                        <form id="bookingForm">
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Full Name</label>
+                                <input type="text" class="form-control" id="name" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="phone" class="form-label">Contact Number</label>
+                                <input type="tel" class="form-control" id="phone" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="eventType" class="form-label">Event Type</label>
+                                <select class="form-select" id="eventType" required>
+                                    <option value="">Select Event Type</option>
+                                    <option value="wedding">Wedding</option>
+                                    <option value="birthday">Birthday Party</option>
+                                    <option value="conference">Conference</option>
+                                    <option value="meeting">Business Meeting</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="attendees" class="form-label">Number of Attendees</label>
+                                <input type="number" class="form-control" id="attendees" min="1" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="eventDate" class="form-label">Selected Date</label>
+                                <input type="text" class="form-control" id="eventDate" readonly>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Book Event</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Event Listing Section -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Upcoming Events</h2>
+                    </div>
+                    <div class="card-body">
+                        <div id="eventList" class="row">
+                            <!-- Events will be dynamically added here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- FullCalendar JS -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+    <!-- Custom JS -->
+    <script src="script.js"></script>
+</body>
+</html> 
