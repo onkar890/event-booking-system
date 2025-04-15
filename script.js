@@ -9,15 +9,24 @@ document.addEventListener('DOMContentLoaded', function() {
             right: 'dayGridMonth,timeGridWeek,timeGridDay'
         },
         selectable: true,
-        select: function(info) {
-            const selectedDate = info.startStr;
-            document.getElementById('eventDate').value = selectedDate;
+        dateClick: function(info) {
+            const selectedDate = info.dateStr;
+            const dateInput = document.getElementById('eventDate');
+            dateInput.value = selectedDate;
             
             // Check if date is available
             if (isDateBooked(selectedDate)) {
                 alert('This date is already booked. Please select another date.');
+                dateInput.value = '';
                 return;
             }
+        },
+        select: function(info) {
+            const selectedDate = info.startStr;
+            const dateInput = document.getElementById('eventDate');
+            dateInput.value = selectedDate;
+            
+          
         },
         eventClick: function(info) {
             showEventDetails(info.event.id);
@@ -174,11 +183,21 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!eventDate.value) {
             showError(eventDate, 'Please select a date');
             isValid = false;
-        } else if (isDateBooked(eventDate.value)) {
-            showError(eventDate, 'This date is already booked');
-            isValid = false;
         } else {
-            removeError(eventDate);
+            const selectedDate = new Date(eventDate.value);
+            selectedDate.setHours(0, 0, 0, 0);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            if (selectedDate < today) {
+                showError(eventDate, 'Cannot book events in the past');
+                isValid = false;
+            } else if (isDateBooked(eventDate.value)) {
+                showError(eventDate, 'This date is already booked');
+                isValid = false;
+            } else {
+                removeError(eventDate);
+            }
         }
 
         return isValid;
@@ -218,7 +237,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Get booked events (simulated data)
     function getBookedEvents() {
         return [
-           
+          
         ];
     }
 
@@ -294,8 +313,7 @@ document.addEventListener('DOMContentLoaded', function() {
             modalInstance.hide();
         }
         
-        // In a real application, this would be an API call
-        console.log('Booking submitted:', formData);
+      
         
         // Add the event to the calendar with a unique ID
         const eventId = 'event-' + Date.now();
@@ -384,11 +402,16 @@ document.addEventListener('DOMContentLoaded', function() {
                         <i class="bi bi-people"></i>
                         <span>${event.extendedProps.attendees || 'Not specified'} attendees</span>
                     </div>
+                    <div class="detail-item">
+                        <i class="bi bi-info-circle"></i>
+                        <span>${getEventDescription(event.title)}</span>
+                    </div>
                 </div>
                 <div class="event-actions">
-                    <button class="btn btn-outline-primary" onclick="showEventDetails('${event.id}')">
+                    <button class="btn btn-outline-primary" onclick="window.showEventDetails('${event.id}')">
                         <i class="bi bi-info-circle"></i> Details
                     </button>
+                   
                 </div>
             `;
             eventList.appendChild(eventCard);
@@ -398,8 +421,17 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize the event list when the page loads
     updateEventList();
 
-  
-  
+    // Helper function to get event description
+    function getEventDescription(eventType) {
+        const descriptions = {
+            'wedding': 'Perfect for your special day with full venue decoration',
+            'birthday': 'Celebrate in style with our party packages',
+            'conference': 'Professional setup with AV equipment included',
+            'meeting': 'Business meeting facilities with refreshments'
+        };
+        return descriptions[eventType.toLowerCase()] || 'Custom event package available';
+    }
+
     // Show event details in a modal
     function showEventDetails(eventId) {
         const event = calendar.getEventById(eventId);
@@ -450,10 +482,13 @@ document.addEventListener('DOMContentLoaded', function() {
                             <i class="bi bi-geo-alt"></i>
                             <strong>Location:</strong> ${event.extendedProps.location || 'Not specified'}
                         </div>
+                        <div class="event-detail-item">
+                            <i class="bi bi-info-circle"></i>
+                            <strong>Description:</strong> ${getEventDescription(event.title)}
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary" onclick="bookThisEvent('${event.id}')">Book Now</button>
                     </div>
                 </div>
             </div>
@@ -474,7 +509,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (event) {
             document.getElementById('eventDate').value = event.startStr;
             document.getElementById('eventType').value = event.title.toLowerCase();
-            // Scroll to the booking form
             document.getElementById('bookingForm').scrollIntoView({ behavior: 'smooth' });
         }
     }
@@ -482,5 +516,4 @@ document.addEventListener('DOMContentLoaded', function() {
     // Make functions available globally
     window.showEventDetails = showEventDetails;
     window.bookThisEvent = bookThisEvent;
-    window.updateEventList = updateEventList;
 }); 
