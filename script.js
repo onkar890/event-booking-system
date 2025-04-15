@@ -386,10 +386,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                 </div>
                 <div class="event-actions">
-                    <button class="btn btn-outline-primary" onclick="window.showEventDetails('${event.id}')">
+                    <button class="btn btn-outline-primary" onclick="showEventDetails('${event.id}')">
                         <i class="bi bi-info-circle"></i> Details
                     </button>
-                   
                 </div>
             `;
             eventList.appendChild(eventCard);
@@ -399,7 +398,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize the event list when the page loads
     updateEventList();
 
-    // Helper function to get event description
+  
   
     // Show event details in a modal
     function showEventDetails(eventId) {
@@ -451,14 +450,10 @@ document.addEventListener('DOMContentLoaded', function() {
                             <i class="bi bi-geo-alt"></i>
                             <strong>Location:</strong> ${event.extendedProps.location || 'Not specified'}
                         </div>
-                        <div class="event-detail-item">
-                            <i class="bi bi-info-circle"></i>
-                            <strong>Description:</strong> ${getEventDescription(event.title)}
-                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary" onclick="window.bookThisEvent('${event.id}')">Book Now</button>
+                        <button type="button" class="btn btn-primary" onclick="bookThisEvent('${event.id}')">Book Now</button>
                     </div>
                 </div>
             </div>
@@ -487,4 +482,5 @@ document.addEventListener('DOMContentLoaded', function() {
     // Make functions available globally
     window.showEventDetails = showEventDetails;
     window.bookThisEvent = bookThisEvent;
+    window.updateEventList = updateEventList;
 }); 
