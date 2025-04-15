@@ -218,16 +218,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Get booked events (simulated data)
     function getBookedEvents() {
         return [
-            // Add your booked events here
-            // Example format:
-            // {
-            //     title: 'Wedding',
-            //     start: '2024-03-15',
-            //     allDay: true,
-            //     extendedProps: {
-            //         eventType: 'wedding'
-            //     }
-            // }
+           
         ];
     }
 
@@ -393,10 +384,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         <i class="bi bi-people"></i>
                         <span>${event.extendedProps.attendees || 'Not specified'} attendees</span>
                     </div>
-                    <div class="detail-item">
-                        <i class="bi bi-info-circle"></i>
-                        <span>${getEventDescription(event.title)}</span>
-                    </div>
                 </div>
                 <div class="event-actions">
                     <button class="btn btn-outline-primary" onclick="window.showEventDetails('${event.id}')">
@@ -413,16 +400,7 @@ document.addEventListener('DOMContentLoaded', function() {
     updateEventList();
 
     // Helper function to get event description
-    function getEventDescription(eventType) {
-        const descriptions = {
-            'wedding': 'Perfect for your special day with full venue decoration',
-            'birthday': 'Celebrate in style with our party packages',
-            'conference': 'Professional setup with AV equipment included',
-            'meeting': 'Business meeting facilities with refreshments'
-        };
-        return descriptions[eventType.toLowerCase()] || 'Custom event package available';
-    }
-
+  
     // Show event details in a modal
     function showEventDetails(eventId) {
         const event = calendar.getEventById(eventId);
