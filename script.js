@@ -22,9 +22,65 @@ document.addEventListener('DOMContentLoaded', function() {
         eventClick: function(info) {
             showEventDetails(info.event.id);
         },
-        events: getBookedEvents()
+        events: getBookedEvents(),
+        eventDidMount: function(info) {
+            const eventType = info.event.extendedProps.eventType?.toLowerCase();
+            if (eventType) {
+                info.el.classList.add(`fc-event-${eventType}`);
+            }
+        },
+        dayCellClassNames: function(arg) {
+            const dateStr = arg.date.toISOString().split('T')[0];
+            if (isDateBooked(dateStr)) {
+                return ['booked-date'];
+            } else {
+                return ['available-date'];
+            }
+        }
     });
     calendar.render();
+
+    // Add CSS classes for date highlighting
+    const style = document.createElement('style');
+    style.textContent = `
+        .booked-date {
+            background-color: #ffebee !important;
+            color: #c62828 !important;
+        }
+        .available-date {
+            background-color: #e8f5e9 !important;
+            color: #2e7d32 !important;
+        }
+        .booked-date:hover {
+            background-color: #ffcdd2 !important;
+        }
+        .available-date:hover {
+            background-color: #c8e6c9 !important;
+        }
+        
+        /* Event type specific colors */
+        .fc-event-wedding {
+            background-color: #ff80ab !important;
+            border-color: #ff80ab !important;
+        }
+        .fc-event-birthday {
+            background-color: #81d4fa !important;
+            border-color: #81d4fa !important;
+        }
+        .fc-event-conference {
+            background-color: #a5d6a7 !important;
+            border-color: #a5d6a7 !important;
+        }
+        .fc-event-meeting {
+            background-color: #b39ddb !important;
+            border-color: #b39ddb !important;
+        }
+        .fc-event {
+            color: white !important;
+            font-weight: bold !important;
+        }
+    `;
+    document.head.appendChild(style);
 
     // Form validation and submission
     const bookingForm = document.getElementById('bookingForm');
@@ -38,11 +94,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 phone: document.getElementById('phone').value,
                 eventType: document.getElementById('eventType').value,
                 attendees: document.getElementById('attendees').value,
-                date: document.getElementById('eventDate').value
+                date: document.getElementById('eventDate').value,
+                location: document.getElementById('location').value
             };
 
-            // Simulate form submission
-            submitBooking(formData);
+            // Show summary modal before submission
+            showSummaryModal(formData);
         }
     });
 
@@ -103,6 +160,15 @@ document.addEventListener('DOMContentLoaded', function() {
             removeError(attendees);
         }
 
+        // Validate location
+        const location = document.getElementById('location');
+        if (!location.value.trim()) {
+            showError(location, 'Location is required');
+            isValid = false;
+        } else {
+            removeError(location);
+        }
+
         // Validate date
         const eventDate = document.getElementById('eventDate');
         if (!eventDate.value) {
@@ -138,26 +204,105 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // Function to get color based on event type
+    function getEventColor(eventType) {
+        const colors = {
+            'wedding': '#ff80ab',
+            'birthday': '#81d4fa',
+            'conference': '#a5d6a7',
+            'meeting': '#b39ddb'
+        };
+        return colors[eventType.toLowerCase()] || '#78909c';
+    }
+
     // Get booked events (simulated data)
     function getBookedEvents() {
         return [
-            {
-                id: 'event-1',
-                title: 'Conference',
-                start: '2024-04-15',
-                allDay: true
-            },
-            {
-                id: 'event-2',
-                title: 'Wedding',
-                start: '2024-04-20',
-                allDay: true
-            }
+            // Add your booked events here
+            // Example format:
+            // {
+            //     title: 'Wedding',
+            //     start: '2024-03-15',
+            //     allDay: true,
+            //     extendedProps: {
+            //         eventType: 'wedding'
+            //     }
+            // }
         ];
+    }
+
+    // Function to show booking summary modal
+    function showSummaryModal(formData) {
+        const modal = document.createElement('div');
+        modal.className = 'modal fade';
+        modal.id = 'summaryModal';
+        modal.innerHTML = `
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Booking Summary</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="summary-item">
+                            <strong>Name:</strong> ${formData.name}
+                        </div>
+                        <div class="summary-item">
+                            <strong>Email:</strong> ${formData.email}
+                        </div>
+                        <div class="summary-item">
+                            <strong>Phone:</strong> ${formData.phone}
+                        </div>
+                        <div class="summary-item">
+                            <strong>Event Type:</strong> ${formData.eventType}
+                        </div>
+                        <div class="summary-item">
+                            <strong>Number of Attendees:</strong> ${formData.attendees}
+                        </div>
+                        <div class="summary-item">
+                            <strong>Location:</strong> ${formData.location}
+                        </div>
+                        <div class="summary-item">
+                            <strong>Date:</strong> ${new Date(formData.date).toLocaleDateString('en-US', {
+                                weekday: 'long',
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric'
+                            })}
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Edit</button>
+                        <button type="button" class="btn btn-primary" id="confirmBookingBtn">Confirm Booking</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        const modalInstance = new bootstrap.Modal(modal);
+        modalInstance.show();
+
+        // Add event listener for the confirm button
+        const confirmBtn = modal.querySelector('#confirmBookingBtn');
+        confirmBtn.addEventListener('click', function() {
+            submitBooking(formData);
+        });
+        
+        // Remove modal from DOM after it's hidden
+        modal.addEventListener('hidden.bs.modal', function () {
+            modal.remove();
+        });
     }
 
     // Simulate form submission
     function submitBooking(formData) {
+        // Close the summary modal
+        const modal = document.getElementById('summaryModal');
+        if (modal) {
+            const modalInstance = bootstrap.Modal.getInstance(modal);
+            modalInstance.hide();
+        }
+        
         // In a real application, this would be an API call
         console.log('Booking submitted:', formData);
         
@@ -165,14 +310,16 @@ document.addEventListener('DOMContentLoaded', function() {
         const eventId = 'event-' + Date.now();
         const newEvent = {
             id: eventId,
-            title: formData.eventType,
+            title: formData.eventType.charAt(0).toUpperCase() + formData.eventType.slice(1),
             start: formData.date,
             allDay: true,
             extendedProps: {
                 name: formData.name,
                 email: formData.email,
                 phone: formData.phone,
-                attendees: formData.attendees
+                attendees: formData.attendees,
+                eventType: formData.eventType.toLowerCase(),
+                location: formData.location
             }
         };
         
@@ -239,12 +386,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
                 <div class="event-details">
                     <div class="detail-item">
-                        <i class="bi bi-clock"></i>
-                        <span>All Day Event</span>
+                        <i class="bi bi-person"></i>
+                        <span>${event.extendedProps.name || 'Not specified'}</span>
                     </div>
                     <div class="detail-item">
                         <i class="bi bi-people"></i>
-                        <span>Open for Booking</span>
+                        <span>${event.extendedProps.attendees || 'Not specified'} attendees</span>
                     </div>
                     <div class="detail-item">
                         <i class="bi bi-info-circle"></i>
@@ -255,9 +402,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <button class="btn btn-outline-primary" onclick="window.showEventDetails('${event.id}')">
                         <i class="bi bi-info-circle"></i> Details
                     </button>
-                    <button class="btn btn-primary" onclick="window.bookThisEvent('${event.id}')">
-                        <i class="bi bi-calendar-plus"></i> Book Now
-                    </button>
+                   
                 </div>
             `;
             eventList.appendChild(eventCard);
@@ -323,6 +468,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="event-detail-item">
                             <i class="bi bi-people"></i>
                             <strong>Attendees:</strong> ${event.extendedProps.attendees || 'Not specified'}
+                        </div>
+                        <div class="event-detail-item">
+                            <i class="bi bi-geo-alt"></i>
+                            <strong>Location:</strong> ${event.extendedProps.location || 'Not specified'}
                         </div>
                         <div class="event-detail-item">
                             <i class="bi bi-info-circle"></i>
